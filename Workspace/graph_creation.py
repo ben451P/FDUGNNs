@@ -68,7 +68,7 @@ def create_graph_more_features(img, method='slic', **seg_kwargs):
                     d_mean = abs(props[l1]['mean'] - props[l2]['mean'])
                     d_med  = abs(props[l1]['median'] - props[l2]['median'])
                     edge_feats = compute_edge_features(img, segments, props, coords)
-                    feats = edge_feats[(l1,l2)]
+                    feats = edge_feats[(min(l1, l2), max(l1, l2))]
                     G.add_edge(l1, l2,
                             diff_mean=d_mean,
                             diff_median=d_med,
