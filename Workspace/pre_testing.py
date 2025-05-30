@@ -47,7 +47,8 @@ dataset = ImageGraphDataset(img_path, labels, segmenter='slic', n_segments=100)
 print(dataset[0])
 train_loader = DataLoader(dataset, batch_size=4, shuffle=True)
 for batch in train_loader:
-    print(batch.x, batch.edge_index, batch.edge_attr, batch.batch)
+    print(batch[0].x, batch[0].edge_attr)
+    # print(batch.x, batch.edge_index, batch.edge_attr, batch.batch)
     
 # added an edge dim (2)
 model = EDGAT(4, 32, 2, 1, 2)

@@ -2,3 +2,5 @@ Test 0 Suffix: Base run, 5 epochs training
 Test 1 Suffix: 50 epochs training patience = 2 early stopping
 Test 2 Suffix: same as 1 but added random.seed(0) 64 node hidden layers
 Test 3 Suffix: 100 epochs early stopping patience = 3, added graph images
+Test 4 Suffix: With normalization of data
+Test 5 Suffix: With addtional node and edge features during graph construction

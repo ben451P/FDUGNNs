@@ -102,36 +102,6 @@ def create_graph(img, method='slic', **seg_kwargs):
     # convert to PyG Data object, preserving node and edge attributes
     return G
 
-# def create_graph(img, method='slic', **seg_kwargs):
-#     """Builds a RAG: nodes carry superpixel stats; edges carry pairwise differences."""
-#     segments = create_superpixels(img, method, **seg_kwargs)
-#     props, coords = superpixel_properties(img, segments)
-
-#     G = nx.Graph()
-#     # add nodes
-#     for label, p in props.items():
-#         node_data = {
-#             'mean': p['mean'],
-#             'median': p['median'],
-#             'centroid_y': coords[label]['centroid_y'],
-#             'centroid_x': coords[label]['centroid_x'],
-#         }
-#         G.add_node(label, **node_data)
-
-#     # add edges between spatially adjacent superpixels
-#     h, w = segments.shape
-#     for y in range(h - 1):
-#         for x in range(w - 1):
-#             l1 = segments[y, x]
-#             for dy, dx in [(1, 0), (0, 1)]:
-#                 l2 = segments[y + dy, x + dx]
-#                 if l1 != l2 and not G.has_edge(l1, l2):
-#                     d_mean = abs(props[l1]['mean'] - props[l2]['mean'])
-#                     d_med  = abs(props[l1]['median'] - props[l2]['median'])
-#                     G.add_edge(l1, l2, diff_mean=d_mean, diff_median=d_med)
-#     return G
-
-
 def create_graph_more_features(img, method='slic', **seg_kwargs):
     """Builds a RAG: nodes carry superpixel stats; edges carry pairwise differences."""
     segments = create_superpixels(img, method, **seg_kwargs)

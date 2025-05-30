@@ -17,27 +17,7 @@ import matplotlib.pyplot as plt
 
 random.seed(0)
 
-# Simple collate to batch variable-size graphs
-def graph_collate(batch):
-    data_list = []
-    for G, y in batch:
-        data = from_networkx(G)
-        # pack all node features into x
-        feats = torch.tensor(
-            [[G.nodes[n]['mean'], G.nodes[n]['median'], G.nodes[n]['centroid_x'], G.nodes[n]['centroid_y']] for n in G.nodes],
-            dtype=torch.float
-        )
-        data.x = feats
-        # pack edge attributes if present
-        if G.number_of_edges() > 0 and 'diff_mean' in list(G.edges(data=True))[0][2]:
-            edge_attrs = torch.tensor(
-                [[attr.get('diff_mean',0), attr.get('diff_median',0)] for _,_,attr in G.edges(data=True)],
-                dtype=torch.float
-            )
-            data.edge_attr = edge_attrs
-        data.y = torch.tensor([y], dtype=torch.long)
-        data_list.append(data)
-    return Batch.from_data_list(data_list)
+run = 5
 
 # Load your image paths and labels
 img_dir = r'C:\Users\Ben\Desktop\VSCodeCoding\FDUInternship\image_dataset\benign'
@@ -50,7 +30,7 @@ image_paths2 = [io.imread(os.path.join(img_dir, f)) for f in os.listdir(img_dir)
 label2 = [1] * len(image_paths2)
 
 use = random.sample(image_paths,len(image_paths2))
-use_labels = [0] * len(image_paths2)
+use_labels = [0] * len(image_paths2) 
 use += image_paths2
 use_labels += [1] * len(image_paths2)
 
@@ -58,19 +38,20 @@ use_labels += [1] * len(image_paths2)
 # Prepare dataset and loaders
 dataset = ImageGraphDataset(use, use_labels, segmenter='slic', n_segments=100)
 train_ds, test_ds = random_split(dataset, [int(len(dataset)*0.8), len(dataset)-int(len(dataset)*0.8)])
-train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, collate_fn=graph_collate)
-test_loader  = DataLoader(test_ds,  batch_size=4, shuffle=False, collate_fn=graph_collate)
+train_loader = DataLoader(train_ds, batch_size=4, shuffle=True)
+test_loader  = DataLoader(test_ds,  batch_size=4, shuffle=False)
 
 # Infer feature and class sizes from first batch
 
-in_dim, out_dim = 4, 2
+in_dim, out_dim = 8, 2
+edge_dim = 4
 hid_dim = 64  # you can tune this
 
 # Initialize models dynamically
 dict_models = {
-    "dgat": DGAT(in_dim, hid_dim, out_dim, edge_dim=2),
-    "edgat": EDGAT(in_dim, hid_dim, out_dim, edge_dim=2),
-    "gat": GAT(in_dim, hid_dim, out_dim, edge_dim=2)
+    "dgat": DGAT(in_dim, hid_dim, out_dim, edge_dim=edge_dim),
+    "edgat": EDGAT(in_dim, hid_dim, out_dim, edge_dim=edge_dim),
+    "gat": GAT(in_dim, hid_dim, out_dim, edge_dim=edge_dim)
 }
 results = []
 
@@ -90,15 +71,15 @@ for name, model in dict_models.items():
     plt.ylabel("Loss")
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig(f"results/{name}_training_loss_plot.png")  # Saves locally
+    plt.savefig(f"results/{name}_training_loss_plot{run}.png")  # Saves locally
     plt.clf()
     # Save
-    torch.save(model.state_dict(), f"saved_models/{name}3.pt")
+    torch.save(model.state_dict(), f"saved_models/{name}{run}.pt")
     stats['model'] = name
     results.append(stats)
 
 # Save summary
 os.makedirs("results", exist_ok=True)
-pd.DataFrame(results).to_csv("results/summary3.csv", index=False)
+pd.DataFrame(results).to_csv(f"results/summary{run}.csv", index=False)
 print("All done.")
 # print(dataset.data, dataset.labels)

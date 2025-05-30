@@ -1,9 +1,10 @@
-
-from skopt import BayesSearchCV
+from torch_geometric.loader import DataLoader
+from torch_geometric.utils import from_networkx
+from skimage import io
+from torch.utils.data import Dataset
+from new_file import create_graph_more_features
 import os
-import torch
 import torch.optim as optim
-import pandas as pd
 from torch_geometric.loader import DataLoader
 from torch_geometric.utils import from_networkx
 from torch_geometric.data import Batch
@@ -14,144 +15,80 @@ from models.GAT import StaticGAT as GAT
 from dataset_definition import ImageGraphDataset
 from torch.utils.data import random_split
 from skimage import io
-import torch_directml
-from skopt import BayesSearchCV
-from sklearn.base import BaseEstimator
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
 
-from sklearn.base import BaseEstimator
-import torch
-import torch.nn.functional as F
+# class ImageGraphDataset(Dataset):
+#     def __init__(self, images, labels, segmenter='slic', normalize=True, **seg_kwargs):
+#         self.data = []
+#         self.segmenter = segmenter
+#         self.seg_kwargs = seg_kwargs
+#         self.labels = labels
+#         self.normalize = normalize
+        
+#         # First pass to collect all node features for statistics
+#         if self.normalize:
+#             all_features = []
+#             for image in images:
+#                 G = create_graph_more_features(image, method=self.segmenter, **self.seg_kwargs)
+#                 all_features.append(np.array([data['x'] for _, data in G.nodes(data=True)]))
+#             all_features = np.concatenate(all_features)
+#             self.mean = np.mean(all_features, axis=0)
+#             self.std = np.std(all_features, axis=0)
+        
+#         # Second pass to create normalized graphs
+#         for i, image in enumerate(images):
+#             G = create_graph_more_features(image, method=self.segmenter, **self.seg_kwargs)
+            
+#             if self.normalize:
+#                 # Normalize node features
+#                 for _, data in G.nodes(data=True):
+#                     data['x'] = (np.array(data['x']) - self.mean) / (self.std + 1e-8)
+            
+#             graph = from_networkx(G, group_node_attrs=["x"], group_edge_attrs=["edge_attr"])
+#             graph.y = self.labels[i]
+#             self.data.append(graph)
 
-class SklearnTorchWrapper(BaseEstimator):
-    def __init__(self, input_dim=2, hidden_dim=32, lr=0.01, weight_decay=0.0, epochs=10,
-                 train_loader=None, val_loader=None):
-        self.input_dim = input_dim
-        self.hidden_dim = hidden_dim
-        self.lr = lr
-        self.weight_decay = weight_decay
-        self.epochs = epochs
-        self.train_loader = train_loader
-        self.val_loader = val_loader
+#     def __len__(self):
+#         return len(self.data)
 
-    def build_model(self):
-        return GAT(4, self.hidden_dim, 2, 1, 2)  # Customize for your real GAT
+#     def __getitem__(self, idx):
+#         return self.data[idx]
 
-    def fit(self, X=None, y=None):
-        self.model = self.build_model()
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model.to(device)
+class ImageGraphDataset(Dataset):
+    """
+    Wraps an array of images and, on __getitem__, returns its corresponding NetworkX graph.
+    """
+    def __init__(self, images, labels, segmenter='slic', **seg_kwargs):
+        self.data    = images
+        self.segmenter = segmenter
+        self.seg_kwargs = seg_kwargs
+        self.labels=labels
+        for i, image in enumerate(self.data):
+            G   = create_graph_more_features(image, method=self.segmenter, **self.seg_kwargs)
+            graph = from_networkx(G, group_node_attrs=["x"], group_edge_attrs=["edge_attr"])
+            graph.y = self.labels[i]
+            self.data[i] = graph
 
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+    def __len__(self):
+        return len(self.data)
 
-        self.losses = []
-        for epoch in range(self.epochs):
-            self.model.train()
-            total_loss = 0
-            for batch in self.train_loader:
-                print(batch)
-                batch = batch.to(device)
-                optimizer.zero_grad()
-                out = self.model(batch.x, batch.edge_index, batch.edge_attr, batch.batch)
-                loss = F.cross_entropy(out, batch.y)
-                loss.backward()
-                optimizer.step()
-                total_loss += loss.item()
-            avg_loss = total_loss / len(self.train_loader)
-            self.losses.append(avg_loss)
-        return self
-
-    def predict(self, loader=None):
-        self.model.eval()
-        preds = []
-        device = next(self.model.parameters()).device
-        loader = loader if loader is not None else self.val_loader
-        with torch.no_grad():
-            for batch in loader:
-                batch = batch.to(device)
-                out = self.model(batch.x, batch.edge_index, batch.edge_attr, batch.batch)
-                pred = out.argmax(dim=1).cpu()
-                preds.append(pred)
-        return torch.cat(preds).numpy()
-
-    def score(self, X=None, y=None):
-        # X, y are ignored; we use val_loader
-        preds = self.predict()
-        true = []
-        for batch in self.val_loader:
-            true.append(batch.y.cpu())
-        true = torch.cat(true).numpy()
-
-        return (preds == true).mean()
-
-
-
-
+    def __getitem__(self, idx):
+        return self.data[idx]
 
 img_dir = r'C:\Users\Ben\Desktop\VSCodeCoding\FDUInternship\image_dataset\benign'
 img_path = os.path.join(img_dir, "ISIC_0015719.jpg")
 img_path = [io.imread(img_path)]
 labels = [0]
 
-def graph_collate(batch):
-    data_list = []
-    for G, y in batch:
-        data = from_networkx(G)
-        # pack all node features into x
-        feats = torch.tensor(
-            [[G.nodes[n]['mean'], G.nodes[n]['median'], G.nodes[n]['centroid_x'], G.nodes[n]['centroid_y']] for n in G.nodes],
-            dtype=torch.float
-        )
-        data.x = feats
-        # pack edge attributes if present
-        if G.number_of_edges() > 0 and 'diff_mean' in list(G.edges(data=True))[0][2]:
-            edge_attrs = torch.tensor(
-                [[attr.get('diff_mean',0), attr.get('diff_median',0)] for _,_,attr in G.edges(data=True)],
-                dtype=torch.float
-            )
-            data.edge_attr = edge_attrs
-        data.y = torch.tensor([y], dtype=torch.long)
-        data_list.append(data)
-    return Batch.from_data_list(data_list)
-
 dataset = ImageGraphDataset(img_path, labels, segmenter='slic', n_segments=100)
-print(dataset[0])
 train_loader = DataLoader(dataset, batch_size=4, shuffle=True)
-search = BayesSearchCV(
-    SklearnTorchWrapper(train_loader=train_loader, val_loader=train_loader),
-    {
-        'hidden_dim': (16, 128),
-        'lr': (1e-4, 1e-1, 'log-uniform'),
-        'weight_decay': (1e-5, 1e-2, 'log-uniform'),
-        'epochs': (5, 20),
-    },
-    n_iter=10,
-    cv=3,
-    scoring='accuracy',
-    verbose=0
-)
 
-# Sample data
-X = np.random.rand(500, 10)
-y = np.random.randint(0, 2, 500)
+for batch in train_loader:
+    print(batch)
+    print(batch[0].x, batch[0].edge_attr)
 
-search.fit(X, y)
-
-print("Best score:", search.best_score_)
-print("Best params:", search.best_params_)
-
-import matplotlib.pyplot as plt
-
-losses = search.best_estimator_.losses
-plt.figure(figsize=(8, 5))
-plt.plot(range(1, len(losses)+1), losses, marker='o')
-plt.title("Training Loss by Epoch")
-plt.xlabel("Epoch")
-plt.ylabel("Loss")
-plt.grid(True)
-plt.tight_layout()
-plt.savefig("training_loss_plot.png")  # Saves locally
-plt.show()
+model = EDGAT(8, 32, 2, 1, 4)
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
+x = train(model, optimizer, train_loader)
+print(x)
+stats = test(model, train_loader)
+print(stats)
