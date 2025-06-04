@@ -4,3 +4,4 @@
 5/22 10:15pm: Ran things and saved data, alright results
 5/23 4:58pm: Added descriprtions to the results and more documentation
 5/26 9:40am: Added github commit for the saved models
+6/4 4:40pm: Used augmented dataset

@@ -43,17 +43,23 @@ def graph_collate(batch):
 img_dir = r'C:\Users\Ben\Desktop\VSCodeCoding\FDUInternship\image_dataset\benign'
 image_paths = [io.imread(os.path.join(img_dir, f)) for f in os.listdir(img_dir)]
 labels = [0] * len(image_paths)
-cutoff = len(labels)
 
 img_dir = r'C:\Users\Ben\Desktop\VSCodeCoding\FDUInternship\image_dataset\malignant'
 image_paths2 = [io.imread(os.path.join(img_dir, f)) for f in os.listdir(img_dir)]
 label2 = [1] * len(image_paths2)
 
-use = random.sample(image_paths,len(image_paths2))
-use_labels = [0] * len(image_paths2)
+img_dir = r'C:\Users\Ben\Desktop\VSCodeCoding\FDUInternship\image_dataset\generated_malignant'
+image_paths3 = [io.imread(os.path.join(img_dir, f)) for f in os.listdir(img_dir)]
+label3 = [1] * len(image_paths2)
+
+use = random.sample(image_paths,len(image_paths2) + len(image_paths3))
+use_labels = [0] * (len(image_paths2) + len(image_paths3))
 use += image_paths2
 use_labels += [1] * len(image_paths2)
+use += image_paths3
+use_labels += [1] * len(image_paths3)
 
+run = 5
 
 # Prepare dataset and loaders
 dataset = ImageGraphDataset(use, use_labels, segmenter='slic', n_segments=100)
@@ -90,15 +96,15 @@ for name, model in dict_models.items():
     plt.ylabel("Loss")
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig(f"results/{name}_training_loss_plot.png")  # Saves locally
+    plt.savefig(f"results/{name}_training_loss_plot{run}.png")  # Saves locally
     plt.clf()
     # Save
-    torch.save(model.state_dict(), f"saved_models/{name}3.pt")
+    torch.save(model.state_dict(), f"saved_models/{name}{run}.pt")
     stats['model'] = name
     results.append(stats)
 
 # Save summary
 os.makedirs("results", exist_ok=True)
-pd.DataFrame(results).to_csv("results/summary3.csv", index=False)
+pd.DataFrame(results).to_csv(f"results/summary{run}.csv", index=False)
 print("All done.")
 # print(dataset.data, dataset.labels)

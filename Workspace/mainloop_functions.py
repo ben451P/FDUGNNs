@@ -43,7 +43,7 @@ class EarlyStopping:
 
 
 
-def train(model, optimizer, train_dataloader, max_epochs=100, patience=5):
+def train(model, optimizer, train_dataloader, max_epochs=20, patience=2):
     device = torch_directml.device()
     device = device if device else "cpu"
     device = "cpu"
