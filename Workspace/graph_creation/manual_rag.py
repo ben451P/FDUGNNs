@@ -13,3 +13,4 @@ def construct_rag(segments):
             if j > 0 and segments[i, j - 1] != node:
                 G.add_edge(node, segments[i, j - 1])
     return G
+
