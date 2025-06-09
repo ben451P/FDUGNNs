@@ -2,5 +2,12 @@ Test 0 Suffix: Base run, 5 epochs training
 Test 1 Suffix: 50 epochs training patience = 2 early stopping
 Test 2 Suffix: same as 1 but added random.seed(0) 64 node hidden layers
 Test 3 Suffix: 100 epochs early stopping patience = 3, added graph images
-Test 4 Suffix: With data normalization
-Test 5 Suffix: With augmented dataset
+Test 4 Suffix: With data normalization, 20 epochs on train loop
+Test 5 Suffix: With augmented dataset, balanced dataset cross_entropy loss
+Test 6 Suffix: Same as test 5 but with GCN
+Test 7 Suffix: Final run with focal_loss and all segmentation models (failure)
+Test 8 Suffix: Final run with corrected alpha values for focal_loss 0.9653515277365767, 5
+Test 9 Suffix: Final run with correct augmented dataset 0.8317231508459848, 4
+Test 10 Suffix: Run with correct augmented dataset .9, 4, early stopping patience 4
+Test 11 Suffix: Focal_loss w a smaller dataset of benign/mal, 1:1 ratio
+Test 12 Suffix: No augmented data

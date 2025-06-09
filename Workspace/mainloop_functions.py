@@ -9,10 +9,11 @@ import pandas as pd
 import torch
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+import torch.nn as nn
 
 
 class EarlyStopping:
-    def __init__(self, patience=3, min_delta=0.0, verbose=False):
+    def __init__(self, patience=4, min_delta=0.0, verbose=False):
         self.patience = patience
         self.min_delta = min_delta
         self.verbose = verbose
@@ -41,6 +42,53 @@ class EarlyStopping:
         if self.best_model_state:
             model.load_state_dict(self.best_model_state)
 
+# 0.9653515277365767, 5
+class GraphFocalLoss(nn.Module):
+    def __init__(self, alpha=.75, gamma=2, reduction='mean'):
+        """
+        Binary Focal Loss for models outputting 2-class logits
+        
+        Args:
+            alpha (float): Weighting factor for positive class (default: 0.25)
+            gamma (float): Focusing parameter (default: 2.0)
+            reduction (str): 'mean', 'sum', or 'none'
+        """
+        super().__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
+
+    def forward(self, inputs, targets):
+        """
+        Args:
+            inputs: (N, 2) tensor of class logits
+            targets: (N) tensor of class indices (0 or 1)
+        """
+        # Convert targets to one-hot encoding
+        targets_onehot = F.one_hot(targets, num_classes=2).float()
+        
+        # Compute softmax probabilities
+        probs = F.softmax(inputs, dim=1)
+        
+        # Extract probabilities of true classes
+        pt = torch.sum(probs * targets_onehot, dim=1)
+        
+        # Compute cross entropy
+        ce_loss = F.cross_entropy(inputs, targets, reduction='none')
+        
+        # Compute alpha weights: alpha for class 1, (1-alpha) for class 0
+        alpha_t = torch.where(targets == 1, 
+                             self.alpha * torch.ones_like(pt),
+                             (1 - self.alpha) * torch.ones_like(pt))
+        
+        # Compute focal loss
+        focal_loss = alpha_t * (1 - pt) ** self.gamma * ce_loss
+
+        if self.reduction == 'mean':
+            return focal_loss.mean()
+        elif self.reduction == 'sum':
+            return focal_loss.sum()
+        return focal_loss
 
 
 def train(model, optimizer, train_dataloader, max_epochs=20, patience=2):
@@ -48,6 +96,8 @@ def train(model, optimizer, train_dataloader, max_epochs=20, patience=2):
     device = device if device else "cpu"
     device = "cpu"
     model.to(device)
+
+    loss_fn = GraphFocalLoss()
 
     scheduler = ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5, verbose=True)
     early_stopper = EarlyStopping(patience=patience, verbose=True)
@@ -66,7 +116,8 @@ def train(model, optimizer, train_dataloader, max_epochs=20, patience=2):
 
             optimizer.zero_grad()
             out = model(batch.x, batch.edge_index, batch.edge_attr, batch.batch)
-            loss = F.cross_entropy(out, batch.y)
+            # loss = loss_fn(out, batch.y)
+            loss = F.cross_entropy(out,batch.y)
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
