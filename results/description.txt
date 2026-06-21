@@ -10,4 +10,5 @@ Test 8 Suffix: Final run with corrected alpha values for focal_loss 0.9653515277
 Test 9 Suffix: Final run with correct augmented dataset 0.8317231508459848, 4
 Test 10 Suffix: Run with correct augmented dataset .9, 4, early stopping patience 4
 Test 11 Suffix: Focal_loss w a smaller dataset of benign/mal, 1:1 ratio
-Test 12 Suffix: No augmented data
+Test 12 Suffix: No augmented daa in the validation dataset
+Test 13 Suffix: No augmented data at all

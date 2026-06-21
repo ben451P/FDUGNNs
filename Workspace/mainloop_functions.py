@@ -44,7 +44,7 @@ class EarlyStopping:
 
 # 0.9653515277365767, 5
 class GraphFocalLoss(nn.Module):
-    def __init__(self, alpha=.75, gamma=2, reduction='mean'):
+    def __init__(self, alpha=0.9823703435367989, gamma=5, reduction='mean'):
         """
         Binary Focal Loss for models outputting 2-class logits
         
@@ -116,8 +116,8 @@ def train(model, optimizer, train_dataloader, max_epochs=20, patience=2):
 
             optimizer.zero_grad()
             out = model(batch.x, batch.edge_index, batch.edge_attr, batch.batch)
-            # loss = loss_fn(out, batch.y)
-            loss = F.cross_entropy(out,batch.y)
+            loss = loss_fn(out, batch.y)
+            # loss = F.cross_entropy(out,batch.y)
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
