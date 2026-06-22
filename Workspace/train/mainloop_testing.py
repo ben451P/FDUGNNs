@@ -7,11 +7,11 @@ import pandas as pd
 from torch_geometric.loader import DataLoader
 from torch_geometric.utils import from_networkx
 from torch_geometric.data import Batch
-from mainloop_functions  import train, test
+from train.mainloop_functions  import train, test
 from models.DGAT import DynamicGAT as DGAT
 from models.EDGAT import DynamicEdgeGAT as EDGAT
 from models.GAT import StaticGAT as GAT
-from dataset_definition import ImageGraphDataset
+from train.dataset_definition import ImageGraphDataset
 from torch.utils.data import random_split
 from skimage import io
 import torch_directml

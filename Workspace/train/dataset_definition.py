@@ -1,5 +1,5 @@
 from torch.utils.data import Dataset
-from graph_creation import create_graph, create_graph_more_features
+from train.graph_creation import create_graph, create_graph_more_features
 from torch_geometric.utils import from_networkx
 import torch
 
@@ -88,21 +88,3 @@ class ImageGraphDataset(Dataset):
 #         G   = create_graph(img, method=self.segmenter, **self.seg_kwargs)
 #         G.y = self.labels[idx]
 #         return G 
-    
-class ImageGraphDatasetRefined(Dataset):
-    """
-    Wraps an array of images and, on __getitem__, returns its corresponding NetworkX graph.
-    """
-    def __init__(self, images, labels, segmenter='slic', **seg_kwargs):
-        self.images    = images
-        self.segmenter = segmenter
-        self.seg_kwargs = seg_kwargs
-        self.labels=labels
-
-    def __len__(self):
-        return len(self.images)
-
-    def __getitem__(self, idx):
-        img = self.images[idx]
-        G   = create_graph_more_features(img, method=self.segmenter, **self.seg_kwargs)
-        return G, self.labels[idx]

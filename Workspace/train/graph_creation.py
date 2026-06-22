@@ -1,8 +1,8 @@
 import networkx as nx
 import numpy as np
-from preprocessing import create_superpixels, superpixel_properties
+from train.preprocessing import create_superpixels, superpixel_properties
 from skimage.segmentation import find_boundaries
-from preprocessing import compute_shape_metrics, compute_texture
+from train.preprocessing import compute_shape_metrics, compute_texture
 
 
 import networkx as nx

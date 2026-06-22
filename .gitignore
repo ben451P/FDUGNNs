@@ -3,3 +3,4 @@ saved_datasets/
 
 **/__pycache__/
 zpast_failures/
+.venv/

@@ -1,7 +1,7 @@
 import torch
 import code
 import os
-from dataset_definition import *
+from train.dataset_definition import *
 
 def test_load_dataset(name):
     path = os.path.join(r"C:\Users\Ben\Desktop\VSCodeCoding\FDUInternship\saved_datasets", name)
