@@ -1,3 +1,7 @@
 image_dataset/
 saved_datasets/
+
 **/__pycache__/
+zpast_failures/
+.venv/
+.DS_Store
