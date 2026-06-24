@@ -4,6 +4,7 @@ from torch_geometric.nn.conv import GATv2Conv
 from torch_geometric.nn import global_mean_pool
 from torch.nn import Linear
 
+# EXPERIMENTAL GAT: Not included in the final paper
 
 class DynamicGAT(torch.nn.Module):
     def __init__(
@@ -24,15 +25,15 @@ class DynamicGAT(torch.nn.Module):
             concat=False,
             edge_dim=edge_dim,
         )
-        self.fc = Linear(hidden_channels, out_channels)  # Graph classification layer
+        self.fc = Linear(hidden_channels, out_channels)
 
     def forward(self, x, edge_index, edge_attr, batch):
         x = self.conv1(x, edge_index, edge_attr)
         x = F.relu(x)
         x = self.conv2(x, edge_index, edge_attr)
         x = F.relu(x)
-        x = global_mean_pool(x, batch)  # Pool node features into graph features
-        x = self.fc(x)  # Classify the entire graph
+        x = global_mean_pool(x, batch)
+        x = self.fc(x) 
         return x
 
     def decode(self, z, edge_label_index, edge_attr=None):

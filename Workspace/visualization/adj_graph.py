@@ -9,15 +9,14 @@ import random
 
 from train.graph_creation import create_graph
 
+
 # image = io.imread('pdfUploaded.jpg')
 
 random.seed(1)
-root = "/Users/benlozzano/VS-Code-Coding/Completed/FDU Internship Final/image_dataset/malignant/"
+root = "../../image_dataset/malignant/"
 images = os.listdir(root)
 
 image = cv2.imread(os.path.join(root, random.sample(images,1)[0]))
-
-
 
 # Perform superpixel segmentation using SLIC
 segments = slic(image, n_segments=100)
@@ -46,3 +45,8 @@ pos = nx.spring_layout(G, seed=42)  # Layout for visualization
 nx.draw(G, pos, with_labels=False, node_size=20, node_color="skyblue", font_size=8, edge_color="gray")
 plt.title("Superpixel Region Adjacency Graph (RAG) Visualization")
 plt.show()
+
+# # Print graph information
+print("Number of nodes (superpixels):", G.number_of_nodes())
+print("Number of edges (adjacency relationships):", G.number_of_edges())
+

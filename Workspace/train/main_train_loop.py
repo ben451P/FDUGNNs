@@ -2,7 +2,6 @@ import torch
 import torch.optim as optim
 import pandas as pd
 import os
-from torch_geometric.loader import DataLoader
 from train.mainloop_functions import train, test
 from models.DGAT import DynamicGAT
 from models.EDGAT import DynamicEdgeGAT
