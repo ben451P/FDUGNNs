@@ -20,17 +20,22 @@ random.seed(0)
 # Increment based on existing files
 run = "13"
 
+ROOT_PATH = "../image_dataset"
+
+benign_path = os.path.join(ROOT_PATH, "benign")
+malignant_path = os.path.join(ROOT_PATH, "malignant")
+gen_malignant_path = os.path.join(ROOT_PATH, "generated_malignant")
 
 # Load your image paths and labels
-img_dir = r'C:\Users\Ben\Desktop\VSCodeCoding\FDUInternship\image_dataset\benign'
+img_dir = benign_path
 image_paths = [io.imread(os.path.join(img_dir, f)) for f in os.listdir(img_dir)]
 
-img_dir = r'C:\Users\Ben\Desktop\VSCodeCoding\FDUInternship\image_dataset\malignant'
+img_dir = malignant_path
 image_paths2 = [io.imread(os.path.join(img_dir, f)) for f in os.listdir(img_dir)]
 labels2 = [1] * len(image_paths2)
 
 ### Uncomment to add synthetic data ###
-# img_dir = r'C:\Users\Ben\Desktop\VSCodeCoding\FDUInternship\image_dataset\generated_malignant'
+# img_dir = gen_malignant_path
 # image_paths3 = [io.imread(os.path.join(img_dir, f)) for f in os.listdir(img_dir)]
 # labels3 = [1] * len(image_paths3)
 

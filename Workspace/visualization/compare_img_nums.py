@@ -8,20 +8,22 @@ save = True
 
 benign = os.path.join(root, "benign")
 malignant = os.path.join(root, "malignant")
+gen_malignant = os.path.join(root, "generated_malignant")
 
 len_benign = len(os.listdir(benign))
 len_malignant = len(os.listdir(malignant))
+len_gen_malignant = len(os.listdir(gen_malignant))
 
 groups = ['Benign', 'Malignant']
 # We added 5000 generated images into the original dataset
-method1 = [len_benign, len_malignant - 5000]
-method2 = [len_benign, len_malignant]
+no_aug = [len_benign, len_malignant]
+with_aug = [len_benign, len_malignant + len_gen_malignant]
 
 x = np.arange(len(groups))
 width = 0.35
 
-bars1 = plt.bar(x - width/2, method1, width, label="Without Augmentation")
-bars2 = plt.bar(x + width/2, method2, width, label="With Augmentation")
+bars1 = plt.bar(x - width/2, no_aug, width, label="Without Augmentation")
+bars2 = plt.bar(x + width/2, with_aug, width, label="With Augmentation")
 
 plt.ylabel('Instances')
 plt.title('Instances Per Category')
