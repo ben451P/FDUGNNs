@@ -12,7 +12,7 @@ This repository is intended to accompany the research paper and allow reviewers 
 
 ## Dataset
 
-The dataset used can be found here: **add link here**
+The dataset used can be found [here](https://drive.google.com/drive/folders/1w_h_ntnSlB3nNm9_XAZNAyVoWBsAskak?usp=sharing)
 
 Add it to the working directory under the name **image_dataset** in order to run the code.
 
@@ -38,4 +38,4 @@ The primary goal is to provide transparency into the methodology, experimental p
 
 If referencing this work, please cite the accompanying paper:
 
-> **Paper to go here**
+Lozzano, B.; Kumar, A.; Patel, M.; Kumar, A.; Vats, S.; Vatsa, A. Evaluating the Effectiveness of Graph Neural Networks on an Augmented Dataset for Melanoma Skin Cancer Detection. AI Engineering 2026, 2 (1), 7. https://doi.org/10.53941/aieng.2026.100007.
