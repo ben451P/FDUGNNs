@@ -1,4 +1,4 @@
-# Skin Melanoma Detection Using Graph Neural Networks
+# Evaluating the Effectiveness of Graph Neural Networks on an Augmented Dataset for Melanoma Skin Cancer Detection
 
 ## Overview
 
